@@ -53,17 +53,13 @@ private:
 	OrthoMesh* shadowData;
 	RenderTexture* shadowTexture;
 
-	std::vector<Light> sceneLights;
 	Light* gLight;
 	Light* rLight;
 	AModel* model;
-
 	ShadowShader* shadowShader;
 	DepthShader* depthShader;
 
-	ShadowMap* gShadowMap;
-	ShadowMap* rShadowMap;
-	std::vector<ShadowMap> shadowMaps;
+	ShadowMap* shadowMap;
 };
 
 #endif
