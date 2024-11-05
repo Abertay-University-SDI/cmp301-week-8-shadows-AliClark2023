@@ -37,18 +37,44 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	// 100
 	int sceneWidth = 100;
 	int sceneHeight = 100;
+	float sceneNear = 0.01;
+	float sceneFar = 50;
 
 	// This is your shadow map
 	shadowMap = new ShadowMap(renderer->getDevice(), shadowmapWidth, shadowmapHeight);
 
 	// Configure directional light
-	light = new Light();
-	light->setAmbientColour(0.3f, 0.3f, 0.3f, 1.0f);
-	light->setDiffuseColour(1.0f, 1.0f, 1.0f, 1.0f);
-	light->setDirection(0.0f, -0.7f, 0.7f);
-	light->setPosition(0.f, 0.f, -10.f);
-	light->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
+	gLight = new Light();
+	gLight->setAmbientColour(0.3f, 0.3f, 0.3f, 1.0f);
+	gLight->setDiffuseColour(0.0f, 1.0f, 0.0f, 1.0f);
+	gLight->setDirection(0.0f, -0.7f, 0.7f);
+	gLight->setPosition(0.f, 0.f, -10.f);
+	gLight->generateProjectionMatrix(sceneNear, sceneFar);
+	gLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
 
+	greenLightDir[0] = gLight->getDirection().x;
+	greenLightDir[1] = gLight->getDirection().y;
+	greenLightDir[2] = gLight->getDirection().z;
+
+	greenLightPos[0] = gLight->getPosition().x;
+	greenLightPos[1] = gLight->getPosition().y;
+	greenLightPos[2] = gLight->getPosition().z;
+
+	rLight = new Light();
+	rLight->setAmbientColour(0.3f, 0.3f, 0.3f, 1.0f);
+	rLight->setDiffuseColour(1.0f, 0.0f, 0.0f, 1.0f);
+	rLight->setDirection(0.0f, -0.7f, 0.7f);
+	rLight->setPosition(0.f, 0.f, -10.f);
+	rLight->generateProjectionMatrix(sceneNear, sceneFar);
+	rLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
+
+	redLightDir[0] = rLight->getDirection().x;
+	redLightDir[1] = rLight->getDirection().y;
+	redLightDir[2] = rLight->getDirection().z;
+
+	redLightPos[0] = rLight->getPosition().x;
+	redLightPos[1] = rLight->getPosition().y;
+	redLightPos[2] = rLight->getPosition().z;
 }
 
 App1::~App1()
@@ -84,6 +110,7 @@ bool App1::frame()
 bool App1::render()
 {
 	totalTime += timer->getTime();
+	updateLights();
 
 	// Perform depth pass
 	depthPass();
@@ -100,9 +127,10 @@ void App1::depthPass()
 	shadowMap->BindDsvAndSetNullRenderTarget(renderer->getDeviceContext());
 
 	// get the world, view, and projection matrices from the camera and d3d objects.
-	light->generateViewMatrix();
-	XMMATRIX lightViewMatrix = light->getViewMatrix();
-	XMMATRIX lightProjectionMatrix = light->getOrthoMatrix();
+	gLight->generateViewMatrix();
+	XMMATRIX lightViewMatrix = gLight->getViewMatrix();
+	//XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
+	XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);
@@ -152,9 +180,10 @@ void App1::renderShadowData() {
 	shadowTexture->clearRenderTarget(renderer->getDeviceContext(), 1.0f, 0.0f, 0.0f, 1.0f);
 
 	// get the world, view, and projection matrices from the camera and d3d objects.
-	light->generateViewMatrix();
-	XMMATRIX lightViewMatrix = light->getViewMatrix();
-	XMMATRIX lightProjectionMatrix = light->getOrthoMatrix();
+	gLight->generateViewMatrix();
+	XMMATRIX lightViewMatrix = gLight->getViewMatrix();
+	//XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
+	XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);
@@ -212,7 +241,7 @@ void App1::finalPass()
 	// Render floor
 	mesh->sendData(renderer->getDeviceContext());
 	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, 
-		textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
+		textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), gLight);
 	shadowShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 	// Render model
@@ -221,7 +250,7 @@ void App1::finalPass()
 	XMMATRIX scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 	worldMatrix = XMMatrixMultiply(worldMatrix, scaleMatrix);
 	model->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), gLight);
 	shadowShader->render(renderer->getDeviceContext(), model->getIndexCount());
 
 	// render cube (left of model)
@@ -231,7 +260,7 @@ void App1::finalPass()
 	worldMatrix = XMMatrixMultiply(worldMatrix, rotationMatrix);
 	worldMatrix = XMMatrixMultiply(worldMatrix, translateM);
 	box->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(nullptr), shadowMap->getDepthMapSRV(), light);
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(nullptr), shadowMap->getDepthMapSRV(), gLight);
 	shadowShader->render(renderer->getDeviceContext(), box->getIndexCount());
 
 	// render sphere (right of model)
@@ -241,12 +270,18 @@ void App1::finalPass()
 	worldMatrix = XMMatrixMultiply(worldMatrix, translateM);
 	worldMatrix = XMMatrixMultiply(worldMatrix, rotationMatrix);
 	sphere->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(nullptr), shadowMap->getDepthMapSRV(), light);
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(nullptr), shadowMap->getDepthMapSRV(), gLight);
 	shadowShader->render(renderer->getDeviceContext(), sphere->getIndexCount());
 
+	// render sphere at light locations (only shows in final pass)
 	worldMatrix = renderer->getWorldMatrix();
+	worldMatrix = XMMatrixTranslation(gLight->getPosition().x, gLight->getPosition().y, gLight->getPosition().z);
+	sphere->sendData(renderer->getDeviceContext());
+	textureShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(nullptr));
+	textureShader->render(renderer->getDeviceContext(), sphere->getIndexCount());
 
 	//render shadow data
+	worldMatrix = renderer->getWorldMatrix();
 	renderer->setZBuffer(false);
 	XMMATRIX orthoMatrix = renderer->getOrthoMatrix();  // ortho matrix for 2D rendering
 	XMMATRIX orthoViewMatrix = camera->getOrthoViewMatrix();	// Default camera position for orthographic rendering
@@ -261,7 +296,20 @@ void App1::finalPass()
 	renderer->endScene();
 }
 
+void App1::twoLDepthPass() {
 
+}
+void App1::render2LDepthData() {
+
+}
+void App1::twoLFinalPass() {
+
+}
+
+void App1::updateLights() {
+	gLight->setPosition(greenLightPos[0], greenLightPos[1], greenLightPos[2]);
+	gLight->setDirection(greenLightDir[0], greenLightDir[1], greenLightDir[2]);
+}
 
 void App1::gui()
 {
@@ -273,6 +321,15 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+
+	ImGui::PushItemWidth(200);
+	ImGui::NewLine;
+	if (ImGui::CollapsingHeader("Green light")) {
+		ImGui::SliderFloat3("green light position", greenLightPos, -50.0, 100.0);
+		ImGui::NewLine;
+		ImGui::SliderFloat3("green light direction", greenLightDir, -1.0, 1.0);
+	}
+	
 
 	// Render UI
 	ImGui::Render();
