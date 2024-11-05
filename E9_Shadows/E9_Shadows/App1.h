@@ -21,12 +21,24 @@ public:
 protected:
 	bool render();
 	void depthPass();
+	void renderShadowData();
 	void finalPass();
 	void gui();
 
 private:
 	TextureShader* textureShader;
 	PlaneMesh* mesh;
+	// additional geometry
+	SphereMesh* sphere;
+	CubeMesh* box;
+
+	// movement variables
+	float totalTime;
+	float speed = 1.0f;
+
+	// rendering the shadow data
+	OrthoMesh* shadowData;
+	RenderTexture* shadowTexture;
 
 	Light* light;
 	AModel* model;
