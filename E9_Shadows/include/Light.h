@@ -15,11 +15,13 @@
 #include <directxmath.h>
 
 using namespace DirectX;
+enum LightTypes { DIRECTIONAL_LIGHT, POINT_LIGHT, SPOT_LIGHT };
 
 class Light
 {
 
 public:
+	
 	void* operator new(size_t i)
 	{
 		return _mm_malloc(i, 16);
@@ -42,6 +44,11 @@ public:
 	void setSpecularPower(float power);											///< Set specular power
 	void setPosition(float x, float y, float z);								///< Set light position (for point lights)
 	void setLookAt(float x, float y, float z);									///< Set light lookAt (near deprecation)
+	// additions
+	void setAttenuation(float constant, float linear, float quadratic);			///< Set specular power
+	void setLightType(LightTypes type);												///< Set Light type
+	void setEnabled(bool status);												///< Set enabled value
+	void setSpotCone(float cone);
 
 	// Getters
 	XMFLOAT4 getAmbientColour();		///< Get ambient colour, returns float4
@@ -53,7 +60,11 @@ public:
 	XMMATRIX getViewMatrix();			///< Get light view matrix for shadow mapping, returns XMMATRIX
 	XMMATRIX getProjectionMatrix();		///< Get light projection matrix for shadow mapping, returns XMMATRIX
 	XMMATRIX getOrthoMatrix();			///< Get light orthographic matrix for shadow mapping, returns XMMATRIX
-
+	// additions
+	XMFLOAT3 getAttenuation();			///< Get attenuation values, returns float3(const, linear, quad)
+	LightTypes getLightType();					///< Get light type value
+	bool isEnabled();					///< Returns true if light is enabled
+	float getSpotCone();				///<< Returns cone value
 
 protected:
 	XMFLOAT4 ambientColour;
@@ -66,6 +77,15 @@ protected:
 	XMMATRIX projectionMatrix;
 	XMMATRIX orthoMatrix;
 	XMVECTOR lookAt; 
+	// additions
+	float spotCone;
+	// attenuation
+	float constantFactor;
+	float linearFactor;
+	float quadraticFactor;
+	// light type
+	LightTypes lightType;
+	bool enabled;
 };
 
 #endif
