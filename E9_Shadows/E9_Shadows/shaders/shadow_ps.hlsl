@@ -78,22 +78,6 @@ float4 main(InputType input) : SV_TARGET
     float4 colour = float4(0.f, 0.f, 0.f, 1.f);
     float4 textureColour = shaderTexture.Sample(diffuseSampler, input.tex);
 
-	//// Calculate the projected texture coordinates.
- //   float2 pTexCoord = getProjectiveCoords(input.lightViewPos);
-	
- //   // Shadow test. Is or isn't in shadow
- //   if (hasDepthData(pTexCoord))
- //   {
- //       // Has depth map data
- //       if (!isInShadow(depthMapTexture, pTexCoord, input.lightViewPos, shadowMapBias))
- //       {
- //           // is NOT in shadow, therefore light
- //           colour = calculateLighting(-direction, input.normal, diffuse);
-            
-            
- //       }
- //   }
-    
     for (int i = 0; i < 2; i++)
     {
      // Calculate the projected texture coordinates.
@@ -106,7 +90,7 @@ float4 main(InputType input) : SV_TARGET
             if (!isInShadow(depthMapTexture[i], pTexCoord, input.lightViewPos[i], shadowMapBias))
             {
             // is NOT in shadow, therefore light
-                colour += calculateLighting(-lights[i].direction, input.normal, lights[i].diffuse);
+               colour += calculateLighting(-lights[i].direction, input.normal, lights[i].diffuse);
             }
         }
     }

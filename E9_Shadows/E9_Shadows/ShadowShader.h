@@ -13,41 +13,6 @@ using namespace DirectX;
 class ShadowShader : public BaseShader
 {
 private:
-	//struct LightProperties
-	//{
-
-	//	XMFLOAT4 ambient; //move to material struct
-	//	XMFLOAT4 diffuse; //move to material struct (change to colour)
-	//	//float4 colour;
-	//	XMFLOAT3 lightDirection;
-	//	float spotCone;
-	//	XMFLOAT3 position;
-	//	float specularPower;
-	//	XMFLOAT4 specularColour;
-
-	//	// attenuation
-	//	float constantFactor;
-	//	float linearFactor;
-	//	float quadraticFactor;
-	//	float attenPadding;
-	//	// light type (0 = directional, 1 = point light, 2 = spotlight)
-	//	int lightType;  //4bytes
-	//	bool enabled;   //4bytes
-	//	int typePadding0; //4bytes
-	//	int typePadding1; //4bytes
-	//};
-	//// array size must <= MAX_LIGHTS in pixel shader
-	//struct LightBufferType
-	//{
-	//	LightProperties light[MAX_LIGHTS];
-	//};
-
-	//struct CameraBufferType
-	//{
-	//	XMFLOAT3 cameraPosition;
-	//	float cameraPadding;
-	//};
-
 	struct MatrixBufferType
 	{
 		XMMATRIX world;
@@ -55,8 +20,6 @@ private:
 		XMMATRIX projection;
 		XMMATRIX lightView[2];
 		XMMATRIX lightProjection[2];
-		/*std::vector<XMMATRIX> lightViews;
-		std::vector<XMMATRIX> lightProjections;*/
 	};
 
 	struct LightProperties
