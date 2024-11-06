@@ -53,13 +53,13 @@ private:
 		XMMATRIX world;
 		XMMATRIX view;
 		XMMATRIX projection;
-		XMMATRIX lightView;
-		XMMATRIX lightProjection;
+		XMMATRIX lightView[2];
+		XMMATRIX lightProjection[2];
 		/*std::vector<XMMATRIX> lightViews;
 		std::vector<XMMATRIX> lightProjections;*/
 	};
 
-	struct LightBufferType
+	struct LightProperties
 	{
 		XMFLOAT4 ambient;
 		XMFLOAT4 diffuse;
@@ -67,13 +67,17 @@ private:
 		float padding;
 	};
 
+	struct LightBufferType
+	{
+		LightProperties lights[2];
+	};
+
 public:
 
 	ShadowShader(ID3D11Device* device, HWND hwnd);
 	~ShadowShader();
 
-	//void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView*depthMap, std::vector<Light> lights);
-	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView*depthMap, Light* light);
+	void setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &world, const XMMATRIX &view, const XMMATRIX &projection, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView*depthMap[2], Light* light[2]);
 
 private:
 	void initShader(const wchar_t* vs, const wchar_t* ps);

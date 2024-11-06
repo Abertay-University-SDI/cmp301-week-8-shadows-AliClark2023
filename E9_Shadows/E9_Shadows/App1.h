@@ -24,14 +24,18 @@ protected:
 	void renderShadowData();
 	void finalPass();
 
-	void twoLDepthPass();
-	void render2LDepthData();
-	void twoLFinalPass();
+	void lightDepthPass();
+	void gLightDepthPass();
+	void renderGLightDepth();
+	void rLightDepthPass();
+	void renderRLightDepth();
+	void finalLightDepthPass();
 
 	bool render();
 	void gui();
 
 	void updateLights();
+	void renderLightSphere(XMFLOAT3 position);
 
 private:
 	TextureShader* textureShader;
@@ -51,8 +55,12 @@ private:
 
 	// rendering the shadow data
 	OrthoMesh* shadowData;
+	OrthoMesh* gShadowData;
+	OrthoMesh* rShadowData;
 	RenderTexture* shadowTexture;
-	std::vector<Light> sceneLights;
+	RenderTexture* greenShadowTexture;
+	RenderTexture* redShadowTexture;
+	Light* sceneLights[2];
 	Light* gLight;
 	Light* rLight;
 	AModel* model;
@@ -60,6 +68,9 @@ private:
 	DepthShader* depthShader;
 
 	ShadowMap* shadowMap;
+	ShadowMap* gLightSM;
+	ShadowMap* rLightSM;
+	//ShadowMap* shadowMaps[2];
 };
 
 #endif

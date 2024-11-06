@@ -1,27 +1,35 @@
-#include "LightFunctions.hlsli"
+//#include "LightFunctions.hlsli"
 Texture2D shaderTexture : register(t0);
-Texture2D depthMapTexture : register(t1);
+Texture2D depthMapTexture[2] : register(t1);
 SamplerState diffuseSampler  : register(s0);
 SamplerState shadowSampler : register(s1);
 
-//cbuffer LightBuffer1 : register(b1)
-//{
-//    LightProps lights[MAX_LIGHTS];
-//};
-
-cbuffer LightBuffer : register(b0)
+struct LightProperties
 {
     float4 ambient;
     float4 diffuse;
     float3 direction;
+    float padding;
 };
+
+cbuffer LightBuffer : register(b0)
+{
+    LightProperties lights[2];
+};
+
+//cbuffer LightBuffer : register(b0)
+//{
+//    float4 ambient;
+//    float4 diffuse;
+//    float3 direction;
+//};
 
 struct InputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
-    float4 lightViewPos : TEXCOORD1;
+    float4 lightViewPos[2] : TEXCOORD1;
 };
 
 // Calculate lighting intensity based on direction and normal. Combine with light colour.
@@ -77,59 +85,39 @@ float4 main(InputType input) : SV_TARGET
     float4 colour = float4(0.f, 0.f, 0.f, 1.f);
     float4 textureColour = shaderTexture.Sample(diffuseSampler, input.tex);
 
-	// Calculate the projected texture coordinates.
-    float2 pTexCoord = getProjectiveCoords(input.lightViewPos);
+	//// Calculate the projected texture coordinates.
+ //   float2 pTexCoord = getProjectiveCoords(input.lightViewPos);
+	
+ //   // Shadow test. Is or isn't in shadow
+ //   if (hasDepthData(pTexCoord))
+ //   {
+ //       // Has depth map data
+ //       if (!isInShadow(depthMapTexture, pTexCoord, input.lightViewPos, shadowMapBias))
+ //       {
+ //           // is NOT in shadow, therefore light
+ //           colour = calculateLighting(-direction, input.normal, diffuse);
+            
+            
+ //       }
+ //   }
+    
+    for (int i = 0; i < 2; i++)
+    {
+     // Calculate the projected texture coordinates.
+        float2 pTexCoord = getProjectiveCoords(input.lightViewPos[i]);
 	
     // Shadow test. Is or isn't in shadow
-    if (hasDepthData(pTexCoord))
-    {
-        // Has depth map data
-        if (!isInShadow(depthMapTexture, pTexCoord, input.lightViewPos, shadowMapBias))
+        if (hasDepthData(pTexCoord))
         {
+        // Has depth map data
+            if (!isInShadow(depthMapTexture[i], pTexCoord, input.lightViewPos[i], shadowMapBias))
+            {
             // is NOT in shadow, therefore light
-            colour = calculateLighting(-direction, input.normal, diffuse);
-            
-            
+                colour += calculateLighting(-lights[i].direction, input.normal, lights[i].diffuse);
+            }
         }
     }
     
-    //LightCalcResult totalResult = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
-    
-   // //Calculate and accumulate light contributions for all active lights
-   // for (int i = 0; i < MAX_LIGHTS; i++)
-   // {
-   //     LightCalcResult result = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };
-        
-   //     if (!lights[i].enabled)
-   //         continue; // moves to next loop interation when light is disabled
-        
-   //     switch (lights[i].lightType)
-   //     {
-   //         case DIRECTIONAL_LIGHT:
-   //             result = calculateDirectionLight(lights[i], newNormal, input.viewVector);
-   //             break;
-   //         case POINT_LIGHT:
-   //             result = calculatePointLight(lights[i], newNormal, input.worldPosition, input.viewVector);
-   //             break;
-   //         case SPOT_LIGHT:
-   //             result = calcualteSpotLight(lights[i], newNormal, input.worldPosition, input.viewVector);
-   //             break;
-   //     }
-   //     totalResult.diffuse += result.diffuse;
-   //     totalResult.specular += result.specular;
-   // }
-    
-   // totalResult.diffuse = saturate(totalResult.diffuse);
-   // totalResult.specular = saturate(totalResult.specular);
-
-   //// change to global ambient when implemented
-   // float4 finalCol;
-    
-   // // texture colour not needed to be added
-   // finalCol = ((lights[0].ambient + totalResult.diffuse + totalResult.specular) * textureColour);
-    
-   // return finalCol;
-    
-    colour = saturate(colour + ambient);
+        colour = saturate(colour + lights[0].ambient);
     return saturate(colour) * textureColour;
 }
