@@ -17,13 +17,6 @@ cbuffer LightBuffer : register(b0)
     LightProperties lights[2];
 };
 
-//cbuffer LightBuffer : register(b0)
-//{
-//    float4 ambient;
-//    float4 diffuse;
-//    float3 direction;
-//};
-
 struct InputType
 {
     float4 position : SV_POSITION;
