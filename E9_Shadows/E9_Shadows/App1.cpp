@@ -51,6 +51,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	gLight->setPosition(0.f, 0.f, -10.f);
 	gLight->generateProjectionMatrix(sceneNear, sceneFar);
 	gLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
+	sceneLights.push_back(*gLight);
 
 	greenLightDir[0] = gLight->getDirection().x;
 	greenLightDir[1] = gLight->getDirection().y;
@@ -67,6 +68,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	rLight->setPosition(0.f, 0.f, -10.f);
 	rLight->generateProjectionMatrix(sceneNear, sceneFar);
 	rLight->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
+	sceneLights.push_back(*rLight);
 
 	redLightDir[0] = rLight->getDirection().x;
 	redLightDir[1] = rLight->getDirection().y;
@@ -129,8 +131,8 @@ void App1::depthPass()
 	// get the world, view, and projection matrices from the camera and d3d objects.
 	gLight->generateViewMatrix();
 	XMMATRIX lightViewMatrix = gLight->getViewMatrix();
-	//XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
-	XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
+	XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
+	//XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);
@@ -182,8 +184,8 @@ void App1::renderShadowData() {
 	// get the world, view, and projection matrices from the camera and d3d objects.
 	gLight->generateViewMatrix();
 	XMMATRIX lightViewMatrix = gLight->getViewMatrix();
-	//XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
-	XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
+	XMMATRIX lightProjectionMatrix = gLight->getProjectionMatrix();
+	//XMMATRIX lightProjectionMatrix = gLight->getOrthoMatrix();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);

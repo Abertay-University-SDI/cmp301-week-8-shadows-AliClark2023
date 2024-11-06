@@ -52,7 +52,7 @@ private:
 	// rendering the shadow data
 	OrthoMesh* shadowData;
 	RenderTexture* shadowTexture;
-
+	std::vector<Light> sceneLights;
 	Light* gLight;
 	Light* rLight;
 	AModel* model;

@@ -10,8 +10,8 @@
 
 struct LightProps
 {
-    float4 ambient; //move to material struct
-    float4 diffuse; //move to material struct (change to colour)
+    float4 ambient;
+    float4 diffuse;
     //float4 colour;
     float3 lightDirection;
     float cone;
@@ -73,7 +73,6 @@ float4 calculateSpecular(LightProps light, float3 lightVec, float3 norm, float3 
 }
 
 // need to clamp returned values for all light calculations
-
 LightCalcResult calculatePointLight(LightProps light, float3 norm, float3 worldPos, float3 viewVec)
 {
     LightCalcResult result;

@@ -66,8 +66,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="LightF.hlsli">
-      <Filter>Resource Files</Filter>
+    <None Include="shaderHeaders\LightFunctions.hlsli">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>
